@@ -10,6 +10,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import { Web3Provider } from "@ethersproject/providers";
 
 interface NavigationItem {
   name: string;
@@ -48,7 +49,7 @@ const Navbar = () => {
   );
 
   const handleSnackbarClose = (
-    event?: React.SyntheticEvent,
+    event: React.SyntheticEvent<Element, Event>,
     reason?: string
   ) => {
     if (reason === "clickaway") {
@@ -65,10 +66,9 @@ const Navbar = () => {
           method: "eth_requestAccounts",
         });
         setAccount(accounts[0]);
-        const ethersProvider = new ethers.providers.Web3Provider(provider);
+        const ethersProvider = new Web3Provider(provider);
         const balance = await ethersProvider.getBalance(accounts[0]);
-        setBalance(ethers.utils.formatEther(balance));
-        fetchTransactions(accounts[0], ethersProvider);
+        setBalance(balance.toString());
         setSnackbarMessage("Wallet connected successfully");
         setSnackbarSeverity("success");
         setSnackbarOpen(true);
@@ -81,18 +81,6 @@ const Navbar = () => {
       setSnackbarMessage("Failed to connect wallet");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
-    }
-  };
-
-  const fetchTransactions = async (
-    account: string,
-    provider: ethers.providers.Web3Provider
-  ) => {
-    try {
-      const history = await provider.getHistory(account);
-      setTransactions(history.slice(-10));
-    } catch (err) {
-      setError("Failed to fetch transactions");
     }
   };
 
@@ -163,17 +151,13 @@ const Navbar = () => {
             <ul>
               {transactions.map((tx, index) => (
                 <li key={index}>
-                  {tx.hash} - {ethers.utils.formatEther(tx.value)} ETH
+                  {tx.hash} - {tx.value} ETH
                 </li>
               ))}
             </ul>
           </div>
         )}
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={6000}
-          onClose={handleSnackbarClose}
-        >
+        <Snackbar open={snackbarOpen} autoHideDuration={6000}>
           <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
             {snackbarMessage}
           </Alert>

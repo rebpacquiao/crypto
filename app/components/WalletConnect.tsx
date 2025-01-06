@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import detectEthereumProvider from "@metamask/detect-provider";
+import { Web3Provider, EtherscanProvider } from "@ethersproject/providers";
 
 const WalletConnect = () => {
   const [account, setAccount] = useState<string | null>(null);
@@ -16,9 +17,9 @@ const WalletConnect = () => {
           method: "eth_requestAccounts",
         });
         setAccount(accounts[0]);
-        const ethersProvider = new ethers.providers.Web3Provider(provider);
+        const ethersProvider = new Web3Provider(provider);
         const balance = await ethersProvider.getBalance(accounts[0]);
-        setBalance(ethers.utils.formatEther(balance));
+        setBalance(balance.toString());
         fetchTransactions(accounts[0], ethersProvider);
       } else {
         setError("MetaMask not detected");
@@ -28,12 +29,10 @@ const WalletConnect = () => {
     }
   };
 
-  const fetchTransactions = async (
-    account: string,
-    provider: ethers.providers.Web3Provider
-  ) => {
+  const fetchTransactions = async (account: string, provider: Web3Provider) => {
     try {
-      const history = await provider.getHistory(account);
+      const etherscanProvider = new EtherscanProvider();
+      const history = await etherscanProvider.getHistory(account);
       setTransactions(history.slice(-10));
     } catch (err) {
       setError("Failed to fetch transactions");
@@ -52,7 +51,7 @@ const WalletConnect = () => {
           <ul>
             {transactions.map((tx, index) => (
               <li key={index}>
-                {tx.hash} - {ethers.utils.formatEther(tx.value)} ETH
+                {tx.hash} - {tx.value} ETH
               </li>
             ))}
           </ul>
