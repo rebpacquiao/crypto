@@ -30,17 +30,14 @@ mongoose
   })
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Middleware to parse JSON
 app.use(express.json());
 
-// Alchemy settings
 const alchemySettings = {
   apiKey: process.env.ALCHEMY_API_KEY!,
   network: Network.ETH_MAINNET,
 };
 const alchemy = new Alchemy(alchemySettings);
 
-// API endpoint
 app.get("/api/eth-info/:address", async (req, res) => {
   const { address } = req.params;
 
@@ -51,16 +48,12 @@ app.get("/api/eth-info/:address", async (req, res) => {
       process.env.ALCHEMY_API_KEY
     );
 
-    // Fetch gas price
     const gasPrice = await provider.getGasPrice();
 
-    // Fetch current block number
     const blockNumber = await provider.getBlockNumber();
 
-    // Fetch balance of the given address
     const balance = await provider.getBalance(address);
 
-    // Fetch token balances and metadata using Alchemy SDK
     const tokenBalances = await alchemy.core.getTokenBalances(address);
     const tokenMetadata = await Promise.all(
       tokenBalances.tokenBalances.map((token) =>
@@ -68,7 +61,6 @@ app.get("/api/eth-info/:address", async (req, res) => {
       )
     );
 
-    // Return data in JSON format
     res.json({
       gasPrice: gasPrice,
       blockNumber,
