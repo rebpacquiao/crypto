@@ -1,8 +1,9 @@
 import express from "express";
-import { ethers } from "ethers";
+import { ethers, providers } from "ethers";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Alchemy, Network } from "alchemy-sdk";
+import { AlchemyProvider } from "@ethersproject/providers";
 
 dotenv.config();
 
@@ -43,41 +44,41 @@ const alchemy = new Alchemy(alchemySettings);
 app.get("/api/eth-info/:address", async (req, res) => {
   const { address } = req.params;
 
-  // try {
-  //   // Connect to Ethereum network
-  //   const provider = new ethers.providers.AlchemyProvider(
-  //     "homestead",
-  //     process.env.ALCHEMY_API_KEY
-  //   );
+  try {
+    // Connect to Ethereum network
+    const provider = new AlchemyProvider(
+      "homestead",
+      process.env.ALCHEMY_API_KEY
+    );
 
-  //   // Fetch gas price
-  //   const gasPrice = await provider.getGasPrice();
+    // Fetch gas price
+    const gasPrice = await provider.getGasPrice();
 
-  //   // Fetch current block number
-  //   const blockNumber = await provider.getBlockNumber();
+    // Fetch current block number
+    const blockNumber = await provider.getBlockNumber();
 
-  //   // Fetch balance of the given address
-  //   const balance = await provider.getBalance(address);
+    // Fetch balance of the given address
+    const balance = await provider.getBalance(address);
 
-  //   // Fetch token balances and metadata using Alchemy SDK
-  //   const tokenBalances = await alchemy.core.getTokenBalances(address);
-  //   const tokenMetadata = await Promise.all(
-  //     tokenBalances.tokenBalances.map((token) =>
-  //       alchemy.core.getTokenMetadata(token.contractAddress)
-  //     )
-  //   );
+    // Fetch token balances and metadata using Alchemy SDK
+    const tokenBalances = await alchemy.core.getTokenBalances(address);
+    const tokenMetadata = await Promise.all(
+      tokenBalances.tokenBalances.map((token) =>
+        alchemy.core.getTokenMetadata(token.contractAddress)
+      )
+    );
 
-  //   // Return data in JSON format
-  //   res.json({
-  //     gasPrice: ethers.utils.formatUnits(gasPrice, "gwei"),
-  //     blockNumber,
-  //     balance: ethers.utils.formatEther(balance),
-  //     tokenBalances,
-  //     tokenMetadata,
-  //   });
-  // } catch (error: any) {
-  //   res.status(500).json({ error: error.message });
-  // }
+    // Return data in JSON format
+    res.json({
+      gasPrice: gasPrice,
+      blockNumber,
+      balance: balance.toString(),
+      tokenBalances,
+      tokenMetadata,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Start the server
