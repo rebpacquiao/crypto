@@ -1,5 +1,5 @@
 import express from "express";
-import { ethers, providers } from "ethers";
+import { ethers } from "ethers";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Alchemy, Network } from "alchemy-sdk";
